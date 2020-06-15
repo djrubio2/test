@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <script src="d3.min.js"></script>
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css?family=Arimo:400,700|Inconsolata:400,700');
+        /* Legend Font Style */
+        
+        body {
+            font: 11px sans-serif;
+            background-color: #ffffff;
+            cursor: crosshair;
+        }
+        
+        path {
+            fill: #f3f3f3;
+        }
+        
+        #sidebar {
+            background-color: #f3f3f3;
+            color: #3b3b3b;
+            width: 200px;
+            height: 300px;
+            padding: 5px;
+            border: 2px solid #3b3b3b;
+            position: absolute;
+            left: 800px;
+            top: 200px;
+            display: none;
+        }
+        /* Legend Position Style */
+        
+        .legend {
+            position: absolute;
+            left: 20px;
+            top: 30px;
+        }
+        
+        #state {
+            font: 23px Arial;
+            font-weight: bold;
+            color: #3b3b3b;
+            padding-bottom: 2px;
+            border-bottom: 2px solid #3b3b3b;
+            width: 100%;
+        }
+        
+        #probR {
+            color: #ff352c;
+            font: 20px Arial;
+            font-weight: bold;
+            float: right;
+            position: relative;
+        }
+        
+        #probD {
+            color: #1e9af3;
+            font: 20px Arial;
+            font-weight: bold;
+            float: left;
+        }
+        
+        #dCand {
+            font: 14px Arial;
+            font-weight: bold;
+            float: left;
+        }
+        
+        #rCand {
+            font: 14px Arial;
+            font-weight: bold;
+            float: right;
+        }
+        
+        .axis text {
+            font: 10px sans-serif;
+        }
+        
+        .axis line,
+        .axis path {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+        
+        img {
+            display: none;
+        }
+        
+        #probBar {
+            width: 200px;
+            height: 15px;
+            background-color: black;
+            left: 50%;
+            display: inline-flex;
+        }
+        
+        #dBar {
+            width: 50%;
+            background-color: #1e9af3;
+            height: 100%;
+        }
+        
+        #rBar {
+            width: 50%;
+            background-color: #ff352c;
+            height: 100%;
+        }
+        
+        #desc {
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
+        
+        #sep {
+            text-align: center;
+            width: 100%;
+            display: inline-block;
+        }
+        
+        table {
+            font: 16px 'Inconsolata';
+            padding-top: 10px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        table tr td:nth-child(0) {
+            width: 50px;
+        }
+        
+        th {
+            border-bottom: 3px solid #3b3b3b;
+        }
+        
+        td {
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="sidebar">
+
+        <div id="state">State Name</div>
+        <div id="desc">Chance of winning:</div>
+        <div width="100%" style="text-align:center">
+            <div id="probD">50%</div>
+            <div id="probR">50%</div>
+
+        </div>
+        <div id="sep">
+            <div id="probBar">
+                <div id="dBar"></div>
+                <div id="rBar"></div>
+            </div>
+
+        </div>
+        <div id="sep">
+            <div id="dCand"></div>
+            <div id="rCand"></div>
+        </div>
+        <div id="tab">
+            <table>
+                <tr>
+                    <th>CANDIDATE</th>
+                    <th>VOTE</th>
+                </tr>
+                <tr>
+                    <td id="c1">Sinema</td>
+                    <td id="v1">49.5%</td>
+
+                </tr>
+                <tr>
+                    <td id="c2"></td>
+                    <td id="v2"></td>
+
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        //Width and height of map
+        var width = 960;
+        var height = 500;
+
+        var lowColor = '#1e9af3'
+        var highColor = '#bc2a66'
+
+        function sideBar(s, rp, dp, ip, dC, rC, iC, dV, rV, iV) {
+            var box = document.getElementById('sidebar');
+            console.log(ip);
+
+            var rProb = document.getElementById('probR');
+            var dProb = document.getElementById('probD');
+            var dCand = document.getElementById('dCand');
+            var rCand = document.getElementById('rCand');
+            var rBar = document.getElementById('rBar');
+            var dBar = document.getElementById('dBar');
+            var State = document.getElementById('state');
+            var v1 = document.getElementById('v1');
+            var v2 = document.getElementById('v2');
+            var c1 = document.getElementById('c1');
+            var c2 = document.getElementById('c2');
+
+            State.innerHTML = s;
+            dCand.innerHTML = dC;
+            rCand.innerHTML = rC;
+
+            rBar.style.width = rp * 100 + "%";
+            dBar.style.width = 100 - rp * 100 + "%";
+            if (rp == null) {
+                box.style.display = "none";
+
+            } else {
+                box.style.display = "block";
+
+            }
+
+            if (dV > rV) {
+                c1.innerHTML = dC;
+                v1.innerHTML = dV + "%";
+                c2.innerHTML = rC;
+                v2.innerHTML = rV + "%";
+            } else if (rV > dV) {
+                c1.innerHTML = rC;
+                v1.innerHTML = rV + "%";
+                c2.innerHTML = dC;
+                v2.innerHTML = dV + "%";
+            }
+
+            if (s == "Maine" || s == "Vermont") {
+                dCand.innerHTML = iC;
+
+
+            }
+
+
+
+
+            if (rp > .99) {
+                rProb.innerHTML = ">99%";
+                dProb.innerHTML = "<1%";
+
+
+            } else if (rp < .01) {
+                dProb.innerHTML = ">99%";
+                rProb.innerHTML = "<1%";
+                if (s == "California") {
+                    rProb.innerHTML = Math.round(ip * 100) + "%";
+                    dProb.innerHTML = Math.round(dp * 100) + "%";
+                    rCand.innerHTML = iC;
+                    rBar.style.width = ip * 100 + "%";
+                    rBar.style.background = "#66abf6";
+                    rProb.style.color = "#66abf6";
+
+                    dBar.style.width = 100 - ip * 100 + "%";
+
+                }
+
+            } else {
+                rProb.innerHTML = Math.round(rp * 100) + "%";
+                dProb.innerHTML = 100 - Math.round(rp * 100) + "%";
+                rBar.style.background = "#ff554d";
+                rProb.style.color = "#ff554d";
+
+
+
+            }
+
+        }
+        // D3 Projection
+        var projection = d3.geoAlbersUsa()
+            .translate([width / 2, height / 2]) // translate to center of screen
+            .scale([1000]); // scale things down so see entire US
+
+        // Define path generator
+        var path = d3.geoPath() // path generator that will convert GeoJSON to SVG paths
+            .projection(projection); // tell path generator to use albersUsa projection
+
+        //Create SVG element and append map to the SVG
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Load in my states data!
+        d3.csv("senateOut.csv", function (data) {
+            var dataArray = [];
+            for (var d = 0; d < data.length; d++) {
+                dataArray.push(parseFloat(data[d].GOP))
+            }
+            var minVal = 0
+            var maxVal = 1
+
+            var d = (maxVal - minVal) / 12
+
+            var ramp = d3.scaleThreshold().domain([minVal + 1 * d, minVal + 2 * d, minVal + 3 * d, minVal + 4 * d, minVal + 5 * d, minVal + 6 * d, minVal + 7 * d, minVal + 8 * d, minVal + 9 * d, minVal + 10 * d, minVal + 11 * d, minVal + 12 * d])
+                .range(['#1e9af3', '#66abf6', '#8fbdf8', '#b2cffa', '#d2e2fc', '#f0f5fe', '#fff1ee', '#ffd4cc', '#ffb7aa', '#ff998a', '#ff796b', '#ff554d']);
+
+
+            var d2 = (maxVal - minVal) / 5
+
+            var ramp2 = d3.scaleThreshold().domain([minVal + 1 * d2, minVal + 2 * d2, minVal + 3 * d2, minVal + 4 * d2, minVal + 5 * d2])
+                .range(['#1779bf', '#1e9af3', '#3b3b3b', '#ff554d', '#b1231c'])
+
+
+
+
+            // Load GeoJSON data and merge with states data
+            d3.json("us-states.json", function (json) {
+
+                // Loop through each state data value in the .csv file
+                for (var i = 0; i < data.length; i++) {
+
+                    // Grab State Name
+                    var dataState = data[i].STATE;
+
+                    // Grab data value 
+                    var dataValue = data[i].GOP;
+
+                    var dem = data[i].DEM;
+                    var ind = data[i].IND;
+
+                    var dCand = data[i].dCand;
+                    var rCand = data[i].rCand;
+                    var iCand = data[i].iCand;
+
+                    var dVote = data[i].dVote;
+                    var rVote = data[i].rVote;
+                    var iVote = data[i].iVote;
+
+
+
+                    // Find the corresponding state inside the GeoJSON
+                    for (var j = 0; j < json.features.length; j++) {
+                        var jsonState = json.features[j].properties.name;
+
+                        if (dataState == jsonState) {
+
+                            // Copy the data value into the JSON
+                            json.features[j].properties.value = dataValue;
+                            json.features[j].properties.dC = dCand;
+                            json.features[j].properties.dem = dem;
+
+                            json.features[j].properties.i = ind;
+
+                            json.features[j].properties.rC = rCand;
+                            json.features[j].properties.iC = iCand;
+
+                            json.features[j].properties.dV = dVote;
+                            json.features[j].properties.rV = rVote;
+                            json.features[j].properties.iV = iVote;
+
+                            // Stop looking through the JSON
+                            break;
+                        }
+                    }
+                }
+
+                // Bind the data to the SVG and create one path per GeoJSON feature
+
+
+
+                svg.selectAll("path")
+                    .data(json.features)
+                    .enter()
+                    .append("path")
+                    .text("70%")
+                    .attr("d", path)
+
+                .on("mouseover", function (d) {
+                        sideBar(d.properties.name, d.properties.value, d.properties.dem, d.properties.i, d.properties.dC, d.properties.rC, d.properties.iC, d.properties.dV, d.properties.rV, d.properties.iV);
+                    })
+                    .attr("id", function (d) {
+                        return d.properties.name
+                    })
+                    .style("stroke", function (d) {
+                        return ramp2(d.properties.value)
+                    })
+                    .style("stroke-width", "1")
+                    .style("stroke-endcap", "round")
+
+                .style("fill", function (d) {
+                    return ramp(d.properties.value)
+                });
+
+                // add a legend
+
+
+
+
+            });
+        });
+    </script>
+    <div style='text-align: right;position: fixed;z-index:9999999;bottom: 0; width: 100%;cursor: pointer;line-height: 0;display:block !important;'>
+        <a title="Hosted on free web hosting 000webhost.com. Host your own website for FREE." target="_blank" href="https://www.000webhost.com/?utm_source=000webhostapp&amp;utm_campaign=000_logo&amp;utm_medium=website_populai&amp;utm_content=footer_img"><img src="https://cdn.rawgit.com/000webhost/logo/e9bd13f7/footer-powered-by-000webhost-white2.png" alt="www.000webhost.com"></a>
+    </div>
+</body>
+
+</html>
